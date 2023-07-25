@@ -6,8 +6,8 @@
 
 import IORedis, { Redis, RedisOptions } from 'ioredis';
 
-import * as config from './config';
-import { logger } from './logger';
+import * as config from './config.js';
+import { logger } from './logger.js';
 
 /**
  * Check whether the maxmemory-policy config is set to noeviction

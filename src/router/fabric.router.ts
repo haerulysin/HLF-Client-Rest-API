@@ -1,7 +1,7 @@
 import { Queue } from "bullmq";
 import express, { Request, Response } from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
-import { getJobSummary, JobNotFoundError } from "../util/jobs";
+import { getJobSummary, JobNotFoundError } from "../util/jobs.js";
 
 export const jobsRouter = express.Router();
 jobsRouter.get("/:jobid", async (req: Request, res: Response) => {

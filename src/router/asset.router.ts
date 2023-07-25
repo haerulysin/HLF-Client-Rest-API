@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
 import { Contract } from "fabric-network";
-import { evaluateTransaction } from "../fabric";
+import { evaluateTransaction } from "../fabric.js";
 import { Queue } from "bullmq";
-import { addSubmitTransactionJob } from "../util/jobs";
+import { addSubmitTransactionJob } from "../util/jobs.js";
 import { body, validationResult } from "express-validator";
 
 export const electionRouter = express.Router();

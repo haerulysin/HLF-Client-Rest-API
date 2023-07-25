@@ -1,10 +1,10 @@
 import { ConnectionOptions, Job, Queue, Worker } from "bullmq";
 import { Application } from "express";
 import { Contract, Transaction } from "fabric-network";
-import * as config from "./config";
-import { getRetryAction, RetryAction } from "./errors";
-import { submitTransaction } from "../fabric";
-import { logger } from "./logger";
+import * as config from "./config.js";
+import { getRetryAction, RetryAction } from "./errors.js";
+import { submitTransaction } from "../fabric.js";
+import { logger } from "./logger.js";
 
 export type JobData = {
   mspid: string;

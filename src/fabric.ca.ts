@@ -1,8 +1,8 @@
-import { handleError, handleFabricCAError } from "./util/errors";
-import { logger } from "./util/logger";
-// import * as FabricCAServices from 'fabric-ca-client';
+import { handleError, handleFabricCAError } from "./util/errors.js";
+import { logger } from "./util/logger.js";
+import FabricCAServices from 'fabric-ca-client';
 import { Wallet } from "fabric-network";
-const FabricCAServices = require("fabric-ca-client");
+// const FabricCAServices = require("fabric-ca-client");
 
 function caConnect() {
   const ccp: Record<string, unknown> = require("./connection/ccp.json");
@@ -15,7 +15,6 @@ function caConnect() {
   );
   return caClient;
 }
-
 
 export async function registerUser(): Promise<any> {
   // const adminIdentity = await wallet.get(adminID);

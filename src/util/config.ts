@@ -1,10 +1,10 @@
-require("dotenv").config();
-
-import * as env from "env-var";
-
+import 'dotenv/config';
+import env from 'env-var';
 export const ORG: string = env.get("ORG_NAME").default("SampleOrg").asString();
 export const MSPID: string = env.get("MSP_ID").default("SampleOrg").asString();
 export const JOB_QUEUE_NAME = "submitContract";
+
+const s = env.get("AA");
 
 export const loglevel: string = env
   .get("LOG_LEVEL")

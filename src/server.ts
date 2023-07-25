@@ -1,49 +1,33 @@
-import express, { Application, Express } from "express";
-import * as bodyParser from "body-parser";
+import express, { Application, Express, Request, Response } from "express";
+import bodyParser from "body-parser";
 import cors from 'cors';
-import helmet from "helmet";
-import { logger } from "./util/logger";
-import * as config from "./util/config";
-import { router } from "./router/router";
+// import helmet from "helmet";
+import { logger } from "./util/logger.js";
+import * as config from "./util/config.js";
+import { router } from "./router/router.js";
 import passport from "passport";
-import RedisStore from "connect-redis";
-import session from "express-session";
-import { createClient } from "redis";
-import { authAPIKey, fabricAPIKeyStrategy } from "./auth";
-import { isMaxmemoryPolicyNoeviction } from "./util/redis";
+import { fabricAPIKeyStrategy } from "./auth.js";
+import { isMaxmemoryPolicyNoeviction } from "./util/redis.js";
 
 export async function createServer(): Promise<Application> {
   const app: Express = express();
 
-  //redisCheckMemory
   if (!(await isMaxmemoryPolicyNoeviction())) {
     throw new Error(
       "Invalid redis configuration: redis instance must have the setting maxmemory-policy=noeviction"
     );
   }
 
-
-  // if (process.env.NODE_ENV === "development") {
-  //   app.use(cors());
-  // }
-  // if (process.env.NODE_ENV === "production") {
-  //   // app.use(helmet());
-  // }
-
   app.use(cors())
-
-  //body-parser
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
-
-  //Passport
   passport.use(fabricAPIKeyStrategy);
   app.use(passport.initialize());
-
   app.use("/api/v1", router);
+  app.use("/", (req:Request, res:Response)=>{res.send("RestAPI for Evote Chaincode")})
   app.listen(config.port, () => {
     logger.info(
-      `${process.env.NODE_ENV} - RestAPI server started on port http://localhost:${config.port}/api/v1`
+      `${process.env.NODE_ENV} - RestAPI server started on port http://localhost:${config.port}`
     );
   });
 

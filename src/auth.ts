@@ -1,4 +1,4 @@
-import { logger } from "./util/logger";
+import { logger } from "./util/logger.js";
 import { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import { getReasonPhrase } from "http-status-codes";

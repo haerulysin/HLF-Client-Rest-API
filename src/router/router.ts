@@ -1,8 +1,8 @@
 // import { authAPIKey } from "../auth";
-import { authAPIKey } from "../auth";
-import { electionRouter, ballotRouter, assetRouter } from "./asset.router";
-import { authRouter } from "./auth.router";
-import { jobsRouter } from "./fabric.router";
+import { authAPIKey } from "../auth.js";
+import { electionRouter, ballotRouter, assetRouter } from "./asset.router.js";
+import { authRouter } from "./auth.router.js";
+import { jobsRouter } from "./fabric.router.js";
 import express from "express";
 
 export const router = express.Router();

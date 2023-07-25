@@ -1,17 +1,16 @@
 import express, { Request, Response } from "express";
 import { getReasonPhrase } from "http-status-codes";
-import { enrollUser, registerUser } from "../fabric.ca";
+import { enrollUser, registerUser } from "../fabric.ca.js";
 import { X509Certificate, createHash, createPrivateKey } from "crypto";
 import { body, validationResult } from "express-validator";
 import { Contract } from "fabric-network";
-
 import {
   createWallet,
   createGateway,
   getNetwork,
   GetContract,
   pingChaincode,
-} from "../fabric";
+} from "../fabric.js";
 
 export const authRouter = express.Router();
 

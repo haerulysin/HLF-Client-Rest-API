@@ -9,10 +9,10 @@ import {
   Network,
   Transaction,
 } from "fabric-network";
-import * as config from "./util/config";
+import * as config from "./util/config.js";
 import * as protos from "fabric-protos";
 import { createHash } from "crypto";
-import { handleError } from "./util/errors";
+import { handleError } from "./util/errors.js";
 
 export const createWallet = async (
   publicCertPem: string,
