@@ -12,12 +12,11 @@ export async function main() {
 
 }
 
-// main().catch(async (err) => {
-//   if (jobQueueWorker != undefined) {
-//     await jobQueue.close();
-//   }
-//   if (jobQueue != undefined) {
-//     await jobQueue.close();
-//   }
-// });
-main();
+main().catch(async (err) => {
+  if (jobQueueWorker != undefined) {
+    await jobQueue.close();
+  }
+  if (jobQueue != undefined) {
+    await jobQueue.close();
+  }
+});
