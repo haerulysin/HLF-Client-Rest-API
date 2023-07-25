@@ -75,8 +75,6 @@ export const initJobQueueWorker = (app: Application): Worker => {
     logger.warn({ job }, "Job failed");
   });
 
-  // Important: need to handle this error otherwise worker may stop
-  // processing jobs
   worker.on("error", (err) => {
     logger.error({ err }, "Worker error");
   });

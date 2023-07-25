@@ -88,7 +88,6 @@ authRouter.post("/register", async (req: Request, res: Response) => {
   const datahash = createHash("sha256")
     .update(JSON.stringify(data))
     .digest("hex");
-
   try {
     const enroll: any = await enrollUser(datahash);
     const pubCert = Buffer.from(enroll.certificate).toString("base64");
