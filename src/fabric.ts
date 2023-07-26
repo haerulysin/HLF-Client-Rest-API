@@ -8,11 +8,23 @@ import {
   DefaultQueryHandlerStrategies,
   Network,
   Transaction,
+
 } from "fabric-network";
 import * as config from "./util/config.js";
-import * as protos from "fabric-protos";
+import * as fproto from '@hyperledger/fabric-protos';
 import { createHash } from "crypto";
 import { handleError } from "./util/errors.js";
+import ccp from './connection/ccp.json' assert {type: 'json'}
+import jsrsasign, { X509 } from 'jsrsasign';
+import { decodeBlock, decodeProcessedTransaction } from "./util/qscc.helper.js";
+
+// function _getCertCN(cert: string): string {
+//   const c = new X509();
+//   c.readCertPEM(cert);
+//   const subject = c.getSubject();
+//   const CN = subject.str.match(/\CN(.*)/gm)[0].split('=')[1];
+//   return CN
+// }
 
 export const createWallet = async (
   publicCertPem: string,
@@ -28,10 +40,12 @@ export const createWallet = async (
     type: "X.509",
     mspId: "SampleOrg",
   };
-  const wallet = await Wallets.newInMemoryWallet();
+
+  const wallet = await Wallets.newFileSystemWallet('./connection/_wallet');
   const uid = createHash("sha256")
     .update(JSON.stringify(identity))
     .digest("hex");
+  // const uid = _getCertCN(certificate);
   await wallet.put(uid, identity);
   return { uid, wallet };
 };
@@ -40,8 +54,6 @@ export const createGateway = async (
   wallet: any | Wallet,
   identity: string
 ): Promise<Gateway> => {
-  const ccp: Record<string, unknown> = require("./connection/ccp.json");
-
   const gateway = new Gateway();
   const gatewayOpts: GatewayOptions = {
     wallet,
@@ -105,7 +117,7 @@ export async function submitTransaction(
 export const getTransactionValidationCode = async (
   qsccContract: Contract,
   txid: string
-): Promise<string> => {
+): Promise<number> => {
   const data = await evaluateTransaction(
     qsccContract,
     "GetTransactionByID",
@@ -113,8 +125,8 @@ export const getTransactionValidationCode = async (
     txid
   );
 
-  const processedTx = protos.protos.ProcessedTransaction.decode(data);
-  return protos.protos.TxValidationCode[processedTx.validationCode];
+  const processedTx = fproto.peer.ProcessedTransaction.deserializeBinary(data);
+  return processedTx.getValidationcode();
 };
 
 export const getBlockHeight = async (
@@ -124,18 +136,52 @@ export const getBlockHeight = async (
     "GetChainInfo",
     config.channelName
   );
-  const info = protos.common.BlockchainInfo.decode(data);
-  return info.height;
+  const info = fproto.common.BlockchainInfo.deserializeBinary(data);
+  return info.getHeight();
 };
 
-export const pingChaincode = async (contract: Contract): Promise<boolean> => {
+
+export const getAllBlock = async (qscc: Contract): Promise<object[]> => {
   try {
-    const resBytes: Buffer = await contract.evaluateTransaction(
-      "org.hyperledger.fabric:GetMetadata"
-    );
-    const resJson = JSON.parse(resBytes.toString());
-    return resJson.contracts;
+    let blockList: any[] = [];
+    const blockHeight: number = await getBlockHeight(qscc) as number;
+    for (let blockNumber = 0; blockNumber < blockHeight; blockNumber++) {
+      const blockRaw = await qscc.evaluateTransaction("GetBlockByNumber", config.channelName, blockNumber.toString());
+      const data = fproto.common.Block.deserializeBinary(blockRaw);
+      const decodedBlock = decodeBlock(data);
+      blockList.push(decodedBlock);
+    }
+    return blockList.reverse();
   } catch (e) {
-    throw handleError("PING",e);
+    throw handleError("0", e);
   }
-};
+}
+
+export const getBlock = async (qscc: Contract, paramType: string, blockArgs: string): Promise<object> => {
+  let qsccFn: string = '';
+  switch (paramType) {
+    case 'number': qsccFn = 'GetBlockByNumber'; break;
+    case 'hash': qsccFn = 'GetBlockByHash'; break;
+    case 'txid': qsccFn = 'GetBlockByTxID'; break;
+    default: qsccFn = 'GetBlockByNumber'; break;
+  }
+  try {
+    const blockraw = await qscc.evaluateTransaction(qsccFn, config.channelName, blockArgs);
+    const data = fproto.common.Block.deserializeBinary(blockraw);
+    return decodeBlock(data);
+  } catch (e) {
+    throw handleError("0", e);
+  }
+}
+
+export const getTransactionById = async (qscc: Contract, txid: string): Promise<object> => {
+
+  const txRaw = await qscc.evaluateTransaction('GetTransactionByID', config.channelName, txid);
+  const decodedTx = decodeProcessedTransaction(txRaw);
+  const blockraw = await qscc.evaluateTransaction('GetBlockByTxID', config.channelName, txid);
+  const decodedBlock = decodeBlock(fproto.common.Block.deserializeBinary(blockraw));
+  return {
+    txData: decodedTx,
+    blockData: decodedBlock
+  }
+}

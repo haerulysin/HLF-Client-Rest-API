@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express";
 import { getReasonPhrase } from "http-status-codes";
-import { enrollUser, registerUser } from "../fabric.ca.js";
 import { X509Certificate, createHash, createPrivateKey } from "crypto";
 import { body, validationResult } from "express-validator";
 import { Contract } from "fabric-network";
@@ -9,8 +8,8 @@ import {
   createGateway,
   getNetwork,
   GetContract,
-  pingChaincode,
 } from "../fabric.js";
+import { enrollUser } from "../fabric.ca.js";
 
 export const authRouter = express.Router();
 
@@ -60,7 +59,7 @@ authRouter.post(
       const nw = await getNetwork(gw);
       const cc = await GetContract(nw);
       req.app.locals[`${uid}_Contract`] = cc;
-      const pingCC = await pingChaincode(cc.assetContract);
+      // const pingCC = await pingChaincode(cc.assetContract);
       return res.status(200).json({
         status: getReasonPhrase(200),
         uid: uid,
@@ -77,55 +76,68 @@ authRouter.post(
   }
 );
 
-authRouter.post("/register", async (req: Request, res: Response) => {
-  //ENROLL REGISTERED IDENTITIES
-  const data = {
-    ...req.body,
-    docType: "Participant",
-  };
+authRouter.post("/enroll",
+  body().isObject().withMessage("Body must contain an asset object"),
+  body("voterID", "must be a string").notEmpty(),
+  body("voterRegisterID", "must be a string").notEmpty(),
+  body("voterName", "must be a string").notEmpty(),
+  async (req: Request, res: Response) => {
+    const validation = validationResult(req);
+    if (!validation.isEmpty()) {
+      return res.status(400).json({
+        status: getReasonPhrase(400),
+        reason: "VALIDATION_ERROR",
+        message: "Invalid request body",
+        timestamp: new Date().toISOString(),
+        errors: validation.array(),
+      });
+    }
+    try {
+      const data = {
+        ...req.body,
+        docType: "Participant",
+      };
+      const datahash = createHash("sha256")
+        .update(JSON.stringify(data))
+        .digest("hex");
+      const enroll: any = await enrollUser(datahash);
+      const pubCert = Buffer.from(enroll.certificate).toString("base64");
+      const prvKey = Buffer.from(enroll.key.toBytes()).toString("base64");
+      return res.status(200).json({
+        certificate: pubCert,
+        privateKey: prvKey,
+      });
+    } catch (err) {
+      return res.status(err.status).json({
+        status: getReasonPhrase(err.status),
+        reason: err.message,
+        timestamp: new Date().toISOString,
+      });
+    }
+  });
 
-  const datahash = createHash("sha256")
-    .update(JSON.stringify(data))
-    .digest("hex");
-  try {
-    const enroll: any = await enrollUser(datahash);
-    const pubCert = Buffer.from(enroll.certificate).toString("base64");
-    const prvKey = Buffer.from(enroll.key.toBytes()).toString("base64");
-    return res.status(200).json({
-      certificate: pubCert,
-      privateKey: prvKey,
-    });
-  } catch (err) {
-    return res.status(err.status).json({
-      status: getReasonPhrase(err.status),
-      reason: err.message,
-      timestamp: new Date().toISOString,
-    });
-  }
-});
+// authRouter.get("/ping", async (req: Request, res: Response) => {
+//   const ApiKey = req.headers["x-api-key"];
+//   const contract: Contract = req.app.locals[`${ApiKey}_Contract`]?.assetContract;
 
-authRouter.get("/ping", async (req: Request, res: Response) => {
-  const ApiKey = req.headers["x-api-key"];
-  const contract: Contract = req.app.locals[`${ApiKey}_Contract`]?.assetContract;
-
-  if (!contract) {
-    return res.status(400).json({
-      status: getReasonPhrase(400),
-      message: "X-API-KEY Not Available, Try login/enroll first.",
-    });
-  }
-  try {
-    await pingChaincode(contract);
-    return res.status(200).json({
-      status:getReasonPhrase(200),
-      api_keys:ApiKey
-    })
-  } catch (e) {
-    console.log(e);
-    return res.status(e.status).json({
-      status: getReasonPhrase(e.status),
-      reason: e.message,
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
+//   if (!contract) {
+//     return res.status(400).json({
+//       status: getReasonPhrase(400),
+//       message: "X-API-KEY Not Available, Try login/enroll first.",
+//     });
+//   }
+//   try {
+//     // await pingChaincode(contract);
+//     return res.status(200).json({
+//       status: getReasonPhrase(200),
+//       api_keys: ApiKey
+//     })
+//   } catch (e) {
+//     console.log(e);
+//     return res.status(e.status).json({
+//       status: getReasonPhrase(e.status),
+//       reason: e.message,
+//       timestamp: new Date().toISOString(),
+//     });
+//   }
+// });

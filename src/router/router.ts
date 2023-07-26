@@ -1,9 +1,10 @@
 // import { authAPIKey } from "../auth";
-import { authAPIKey } from "../auth.js";
-import { electionRouter, ballotRouter, assetRouter } from "./asset.router.js";
-import { authRouter } from "./auth.router.js";
-import { jobsRouter } from "./fabric.router.js";
 import express from "express";
+import { authAPIKey } from "../auth.js";
+import { electionRouter } from "./election.router.js";
+import { authRouter } from "./auth.router.js";
+import { ballotRouter } from "./ballot.router.js";
+import { utilityRouter } from "./utility.router.js";
 
 export const router = express.Router();
 
@@ -17,19 +18,16 @@ const routeList = [
     route: authRouter,
   },
   {
-    path: "/asset",
-    route: assetRouter,
-  },
-
-  {
     path: "/ballot",
-    route: ballotRouter,
+    route: ballotRouter
   },
 
   {
-    path: "/jobs",
-    route: jobsRouter
-  }
+    path: "/",
+    route: utilityRouter
+  },
+
+  
 ];
 
 for (const r of routeList) {
@@ -39,8 +37,3 @@ for (const r of routeList) {
   }
   router.use(r.path, authAPIKey, r.route);
 }
-
-router.post("/test", async(req,res) => {
-  console.log(req.body);
-  res.send(req.body)
-})

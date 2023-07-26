@@ -6,7 +6,7 @@ const buildWallet = async (walletPath: string): Promise<Wallet> => {
     let wallet: Wallet;
     if (walletPath) {
         // fs.rmSync(walletPath, { recursive: true, force: true });
-        wallet = await Wallets.newFileSystemWallet(walletPath);
+        wallet = await Wallets.newFileSystemWallet('./connection/_wallet');
         console.log(`Built a file system wallet at ${walletPath}`);
     } else {
         wallet = await Wallets.newInMemoryWallet();

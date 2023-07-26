@@ -1,6 +1,4 @@
 import { TimeoutError, TransactionError } from "fabric-network";
-// import { logger } from "./logger";
-
 export enum RetryAction {
   WithExistingTransactionId,
   WithNewTransactionId,
