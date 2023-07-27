@@ -6,6 +6,7 @@ export type Election = {
     electionShowResult: boolean;
     owner: string;
     docType: string;
+    totalVotes?:number;
 };
 
 export type Participant = {

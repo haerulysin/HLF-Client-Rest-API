@@ -1,14 +1,15 @@
 import express, { Request, Response } from "express";
 import { getReasonPhrase } from "http-status-codes";
 import { Contract } from "fabric-network";
-import { evaluateTransaction } from "../fabric.js";
+import { countElectionVote, evaluateTransaction } from "../fabric.js";
+import { Election } from "../util/types.js";
 
 export const electionRouter = express.Router();
 electionRouter.get("/", async (req: Request, res: Response) => {
   try {
     const contract: Contract = req.app.locals[`${req.user}_Contract`]?.assetContract;
     const data = await evaluateTransaction(contract, "GetElectionList");
-    let asset = [];
+    let asset: any[] = [];
     if (data.length > 0) {
       asset = JSON.parse(data.toString());
     } else {
@@ -32,14 +33,10 @@ electionRouter.get("/:id", async (req: Request, res: Response) => {
     const contract: Contract =
       req.app.locals[`${req.user}_Contract`].assetContract;
 
-    const query = {selector:{docType:'Election', electionID: req.params.id}}
-    const data = await evaluateTransaction(
-      contract,
-      "FindAsset",
-      JSON.stringify(query)
-    );
+    const data = await evaluateTransaction(contract, "GetElectionByID", req.params.id)
     return res.status(200).json(JSON.parse(data.toString()));
   } catch (err) {
+    console.log(err)
     return res.status(200).json({
       status: getReasonPhrase(err.status),
       reason: err.message,

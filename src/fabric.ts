@@ -25,10 +25,10 @@ export const getWallet = async (): Promise<Wallet> => {
   return wallet;
 }
 
-export async function getCertCN(uid:string): Promise<any> {
-  const wallet:Wallet = await getWallet();
+export async function getCertCN(uid: string): Promise<any> {
+  const wallet: Wallet = await getWallet();
   // const cert = (await wallet.get(uid) as any).credentials.certificate;
-  const identity:any = await wallet.get(uid);
+  const identity: any = await wallet.get(uid);
   const cert = identity.credentials.certificate;
   const c = new X509();
   c.readCertPEM(cert);
@@ -193,4 +193,18 @@ export const getTransactionById = async (qscc: Contract, txid: string): Promise<
     txData: decodedTx,
     blockData: decodedBlock
   }
+}
+
+
+export const countElectionVote = async (contract: Contract, electionID: string): Promise<number> => {
+
+  const queryGetBallot = { selector: { docType: 'Ballot', isCasted: true, electionID: electionID } };
+  const dataBallot = await evaluateTransaction(
+    contract,
+    "FindAsset",
+    JSON.stringify(queryGetBallot)
+  );
+  const ballotlength = JSON.parse(dataBallot.toString()).length;
+
+  return ballotlength;
 }
