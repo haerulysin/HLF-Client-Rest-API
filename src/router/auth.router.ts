@@ -1,8 +1,7 @@
 import express, { Request, Response } from "express";
 import { getReasonPhrase } from "http-status-codes";
-import { X509Certificate, createHash, createPrivateKey } from "crypto";
+import { X509Certificate, createHash } from "crypto";
 import { body, validationResult } from "express-validator";
-import { Contract } from "fabric-network";
 import {
   createWallet,
   createGateway,
@@ -92,9 +91,15 @@ authRouter.post("/enroll",
         errors: validation.array(),
       });
     }
+
     try {
+
+      const {voterID, voterName, voterRegisterID} = req.body;
+
       const data = {
-        ...req.body,
+        voterID,
+        voterRegisterID,
+        voterName,
         docType: "Participant",
       };
       const datahash = createHash("sha256")

@@ -15,16 +15,27 @@ import * as fproto from '@hyperledger/fabric-protos';
 import { createHash } from "crypto";
 import { handleError } from "./util/errors.js";
 import ccp from './connection/ccp.json' assert {type: 'json'}
-import jsrsasign, { X509 } from 'jsrsasign';
+import { X509 } from 'jsrsasign';
 import { decodeBlock, decodeProcessedTransaction } from "./util/qscc.helper.js";
 
-// function _getCertCN(cert: string): string {
-//   const c = new X509();
-//   c.readCertPEM(cert);
-//   const subject = c.getSubject();
-//   const CN = subject.str.match(/\CN(.*)/gm)[0].split('=')[1];
-//   return CN
-// }
+
+
+export const getWallet = async (): Promise<Wallet> => {
+  const wallet = await Wallets.newFileSystemWallet('./connection/_wallet');
+  return wallet;
+}
+
+export async function getCertCN(uid:string): Promise<any> {
+  const wallet:Wallet = await getWallet();
+  // const cert = (await wallet.get(uid) as any).credentials.certificate;
+  const identity:any = await wallet.get(uid);
+  const cert = identity.credentials.certificate;
+  const c = new X509();
+  c.readCertPEM(cert);
+  const subject = c.getSubject();
+  const CN = subject.str.match(/\CN(.*)/gm)[0].split('=')[1];
+  return CN;
+}
 
 export const createWallet = async (
   publicCertPem: string,
@@ -45,7 +56,6 @@ export const createWallet = async (
   const uid = createHash("sha256")
     .update(JSON.stringify(identity))
     .digest("hex");
-  // const uid = _getCertCN(certificate);
   await wallet.put(uid, identity);
   return { uid, wallet };
 };
@@ -175,7 +185,6 @@ export const getBlock = async (qscc: Contract, paramType: string, blockArgs: str
 }
 
 export const getTransactionById = async (qscc: Contract, txid: string): Promise<object> => {
-
   const txRaw = await qscc.evaluateTransaction('GetTransactionByID', config.channelName, txid);
   const decodedTx = decodeProcessedTransaction(txRaw);
   const blockraw = await qscc.evaluateTransaction('GetBlockByTxID', config.channelName, txid);

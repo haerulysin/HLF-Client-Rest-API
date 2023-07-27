@@ -1,7 +1,5 @@
-import { handleError, handleFabricCAError } from "./util/errors.js";
-import { logger } from "./util/logger.js";
+import { handleFabricCAError } from "./util/errors.js";
 import FabricCAServices from 'fabric-ca-client';
-import { Wallet } from "fabric-network";
 
 import ccp from './connection/ccp.json' assert {type:'json'}
 
@@ -29,3 +27,4 @@ export async function enrollUser(userID: string): Promise<object> {
     throw handleFabricCAError(err);
   }
 }
+

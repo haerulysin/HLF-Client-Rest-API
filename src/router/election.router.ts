@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { getReasonPhrase, StatusCodes } from "http-status-codes";
+import { getReasonPhrase } from "http-status-codes";
 import { Contract } from "fabric-network";
 import { evaluateTransaction } from "../fabric.js";
 

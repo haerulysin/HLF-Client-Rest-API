@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
-import { getReasonPhrase, StatusCodes } from "http-status-codes";
-import { Contract } from "fabric-network";
-import { evaluateTransaction } from "../fabric.js";
+import { getReasonPhrase } from "http-status-codes";
+import { Contract} from "fabric-network";
+import { evaluateTransaction, getCertCN} from "../fabric.js";
 import { Queue } from "bullmq";
 import { addSubmitTransactionJob } from "../util/jobs.js";
 import { body, validationResult } from "express-validator";
@@ -10,8 +10,9 @@ export const ballotRouter = express.Router();
 ballotRouter.get('/', async (req: Request, res: Response) => {
     try {
         const contract:Contract = req.app.locals[`${req.user}_Contract`].assetContract;
-        const query = {selector:{docType:'Ballot', owner:req.user}}
-        console.log(req.user)
+
+        const CN = await getCertCN(req.user);
+        const query = {selector:{docType:'Ballot', owner:CN}}
         const data = await evaluateTransaction(
             contract,
             'FindAsset',

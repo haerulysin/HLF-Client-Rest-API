@@ -1,4 +1,4 @@
-import express, { Application, Express, Request, Response } from "express";
+import express, { Application, Express} from "express";
 import bodyParser from "body-parser";
 import cors from 'cors';
 // import helmet from "helmet";
@@ -28,7 +28,6 @@ export async function createServer(): Promise<Application> {
   passport.use(fabricAPIKeyStrategy);
   app.use(passport.initialize());
   app.use("/api/v1", router);
-  // app.use("/", (req: Request, res: Response) => { res.send("RestAPI for Evote Chaincode") })
   app.listen(config.port, () => {
     logger.info(
       `${process.env.NODE_ENV} - RestAPI server started on port http://localhost:${config.port}`

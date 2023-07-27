@@ -1,8 +1,8 @@
 import { Queue } from "bullmq";
 import express, { Request, Response } from "express";
-import { getReasonPhrase, StatusCodes } from "http-status-codes";
+import { getReasonPhrase } from "http-status-codes";
 import { getJobSummary, JobNotFoundError } from "../util/jobs.js";
-import { getAllBlock, getBlock, getBlockHeight, getTransactionById, getTransactionValidationCode } from "../fabric.js";
+import { getAllBlock, getBlock, getTransactionById } from "../fabric.js";
 import { ContractList } from "../util/types.js";
 import { Contract } from "fabric-network";
 
