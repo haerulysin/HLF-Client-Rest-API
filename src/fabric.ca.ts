@@ -23,7 +23,6 @@ export async function enrollUser(userID: string): Promise<object> {
     });
     return enrollment;
   } catch (err) {
-    console.log(err)
     throw handleFabricCAError(err);
   }
 }

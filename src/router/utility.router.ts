@@ -51,7 +51,6 @@ utilityRouter.get("/block/:fnType/:fnArgs", async (req: Request, res: Response) 
     const block = await getBlock(contract, fnType, fnArgs);
     return res.status(200).json(block);
   } catch (e) {
-    console.log(e)
     return res.status(500).json({
       status: getReasonPhrase(500),
       message: e,
@@ -70,7 +69,6 @@ utilityRouter.get("/transaction/:txId", async (req: Request, res: Response) => {
     return res.status(200).json(txData);
 
   } catch (e) {
-    console.log(e)
     return res.status(500).json({
       status: getReasonPhrase(500),
       message: e,

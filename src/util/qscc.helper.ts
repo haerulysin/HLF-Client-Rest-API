@@ -311,8 +311,6 @@ export const decodeBlockEventProtobuf = (
 
 
 export const getBlockHash = (header: fproto.common.BlockHeader): string => {
-    // console.log(Buffer.from(header.getPreviousHash()))
-
     let sequence = new asn1.Sequence({
         value: [
             new asn1.Integer({ value: header.getNumber() }),

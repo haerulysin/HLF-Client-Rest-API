@@ -9,6 +9,7 @@ import {
   GetContract,
 } from "../fabric.js";
 import { enrollUser } from "../fabric.ca.js";
+import { Contract } from "fabric-network";
 
 export const authRouter = express.Router();
 
@@ -94,7 +95,7 @@ authRouter.post("/enroll",
 
     try {
 
-      const {voterID, voterName, voterRegisterID} = req.body;
+      const { voterID, voterName, voterRegisterID } = req.body;
 
       const data = {
         voterID,
@@ -121,28 +122,27 @@ authRouter.post("/enroll",
     }
   });
 
-// authRouter.get("/ping", async (req: Request, res: Response) => {
-//   const ApiKey = req.headers["x-api-key"];
-//   const contract: Contract = req.app.locals[`${ApiKey}_Contract`]?.assetContract;
+authRouter.get("/ping", async (req: Request, res: Response) => {
+  const ApiKey = req.headers["x-api-key"];
+  const contract: Contract = req.app.locals[`${ApiKey}_Contract`]?.assetContract;
 
-//   if (!contract) {
-//     return res.status(400).json({
-//       status: getReasonPhrase(400),
-//       message: "X-API-KEY Not Available, Try login/enroll first.",
-//     });
-//   }
-//   try {
-//     // await pingChaincode(contract);
-//     return res.status(200).json({
-//       status: getReasonPhrase(200),
-//       api_keys: ApiKey
-//     })
-//   } catch (e) {
-//     console.log(e);
-//     return res.status(e.status).json({
-//       status: getReasonPhrase(e.status),
-//       reason: e.message,
-//       timestamp: new Date().toISOString(),
-//     });
-//   }
-// });
+  if (!contract) {
+    return res.status(400).json({
+      status: getReasonPhrase(400),
+      message: "X-API-KEY Not Available, Try login/enroll first.",
+    });
+  }
+  try {
+    // await pingChaincode(contract);
+    return res.status(200).json({
+      status: getReasonPhrase(200),
+      api_keys: ApiKey
+    })
+  } catch (e) {
+    return res.status(e.status).json({
+      status: getReasonPhrase(e.status),
+      reason: e.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});

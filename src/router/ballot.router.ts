@@ -30,7 +30,7 @@ ballotRouter.get('/', async (req: Request, res: Response) => {
 })
 
 ballotRouter.post(
-    "/castvote",
+    "/",
     body().isObject().withMessage("Body must contain an asset object"),
     body("pickedID", "must be a string").notEmpty(),
     body("electionID", "must be a string").notEmpty(),

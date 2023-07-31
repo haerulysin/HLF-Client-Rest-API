@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { getReasonPhrase } from "http-status-codes";
 import { Contract } from "fabric-network";
 import { countElectionVote, evaluateTransaction } from "../fabric.js";
-import { Election } from "../util/types.js";
+import { Candidate, Election } from "../util/types.js";
 
 export const electionRouter = express.Router();
 electionRouter.get("/", async (req: Request, res: Response) => {
@@ -34,7 +34,11 @@ electionRouter.get("/:id", async (req: Request, res: Response) => {
       req.app.locals[`${req.user}_Contract`].assetContract;
 
     const data = await evaluateTransaction(contract, "GetElectionByID", req.params.id)
-    return res.status(200).json(JSON.parse(data.toString()));
+    const electionData = JSON.parse(data.toString()) as Election;
+    const getCandidateQuery = { selector: { docType: 'Candidate', electionID: electionData.electionID } }
+    const getCandidate = await evaluateTransaction(contract, "FindAsset", JSON.stringify(getCandidateQuery));
+    const candidateData = JSON.parse(getCandidate.toString()) as Candidate[];
+    return res.status(200).json({...electionData, candidateList: candidateData});
   } catch (err) {
     console.log(err)
     return res.status(200).json({
