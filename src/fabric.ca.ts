@@ -1,8 +1,6 @@
 import { handleFabricCAError } from "./util/errors.js";
 import FabricCAServices from 'fabric-ca-client';
-
 import ccp from './connection/ccp.json' assert {type:'json'}
-
 function caConnect() {
   const caInfo = ccp.certificateAuthorities["localhost"];
   const cacerts = [caInfo.CACerts.pem];
@@ -23,6 +21,7 @@ export async function enrollUser(userID: string): Promise<object> {
     });
     return enrollment;
   } catch (err) {
+
     throw handleFabricCAError(err);
   }
 }

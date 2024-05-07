@@ -33,7 +33,7 @@ export async function getCertCN(uid: string): Promise<any> {
   const c = new X509();
   c.readCertPEM(cert);
   const subject = c.getSubject();
-  const CN = subject.str.match(/\CN(.*)/gm)[0].split('=')[1];
+  const CN = subject.str.match(/CN(.*)/gm)[0].split('=')[1];
   return CN;
 }
 
@@ -141,7 +141,7 @@ export const getTransactionValidationCode = async (
 
 export const getBlockHeight = async (
   qscc: Contract
-): Promise<number | Long.Long> => {
+): Promise<number> => {
   const data = await qscc.evaluateTransaction(
     "GetChainInfo",
     config.channelName
@@ -185,13 +185,17 @@ export const getBlock = async (qscc: Contract, paramType: string, blockArgs: str
 }
 
 export const getTransactionById = async (qscc: Contract, txid: string): Promise<object> => {
-  const txRaw = await qscc.evaluateTransaction('GetTransactionByID', config.channelName, txid);
-  const decodedTx = decodeProcessedTransaction(txRaw);
-  const blockraw = await qscc.evaluateTransaction('GetBlockByTxID', config.channelName, txid);
-  const decodedBlock = decodeBlock(fproto.common.Block.deserializeBinary(blockraw));
-  return {
-    txData: decodedTx,
-    blockData: decodedBlock
+  try {
+    const txRaw = await qscc.evaluateTransaction('GetTransactionByID', config.channelName, txid);
+    const decodedTx = decodeProcessedTransaction(txRaw);
+    const blockraw = await qscc.evaluateTransaction('GetBlockByTxID', config.channelName, txid);
+    const decodedBlock = decodeBlock(fproto.common.Block.deserializeBinary(blockraw));
+    return {
+      txData: decodedTx,
+      blockData: decodedBlock
+    }
+  }catch(e){
+    throw handleError("0", e);
   }
 }
 

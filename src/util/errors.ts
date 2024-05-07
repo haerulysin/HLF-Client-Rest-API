@@ -123,10 +123,10 @@ export class UnauthorizedAccessBallot extends ContractError {
   }
 }
 
-const MatchNoValidResponsePeer = (msg:string):string|null => {
+const MatchNoValidResponsePeer = (msg: string): string | null => {
   const msgremovline = msg.replace(/(\r\n|\n|\r)/gm, "");
   const messageMatch = msgremovline.match(/(No valid responses from any peers.*)/g)
-  if(messageMatch!==null){
+  if (messageMatch !== null) {
     const errMsg = messageMatch[0].match(/(message=)(.*)/)![2];
     return errMsg
   }
@@ -135,11 +135,28 @@ const MatchNoValidResponsePeer = (msg:string):string|null => {
 }
 
 
-export class NoValidResponsePeerError extends ContractError{
-  constructor(msg:string, txid:string, status:number){
-    super(msg,txid,status);
+export class NoValidResponsePeerError extends ContractError {
+  constructor(msg: string, txid: string, status: number) {
+    super(msg, txid, status);
     Object.setPrototypeOf(this, NoValidResponsePeerError.prototype);
-    this.name  = "NoValidResponsePeerError"
+    this.name = "NoValidResponsePeerError"
+  }
+}
+
+const MatchNoTxIdFound = (msg: string): string | null => {
+  const messageMatch = msg.match(/Failed to get transaction with id asd, error no such transaction ID+(.*)/gm);
+  if (messageMatch !== null) {
+    return messageMatch[0];
+  }
+
+  return null;
+}
+
+export class NoTxIdFound extends ContractError {
+  constructor(msg: string, txid: string, status: number) {
+    super(msg, txid, status);
+    Object.setPrototypeOf(this, NoTxIdFound.prototype);
+    this.name = "NoTxIdFound"
   }
 }
 
@@ -168,8 +185,12 @@ export function handleError(txid: string, err: unknown): Error | unknown {
     }
 
     const matchNoValidResponsePeer = MatchNoValidResponsePeer(err.message);
-    if(matchNoValidResponsePeer!==null){
-      return new NoValidResponsePeerError(matchNoValidResponsePeer,txid, 400);
+    if (matchNoValidResponsePeer !== null) {
+      return new NoValidResponsePeerError(matchNoValidResponsePeer, txid, 400);
+    }
+    const matchMatchNoTxIdFound = MatchNoTxIdFound(err.message);
+    if (matchMatchNoTxIdFound !== null) {
+      return new NoTxIdFound("AAA", txid, 404);
     }
   }
   return err;

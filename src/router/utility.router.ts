@@ -69,6 +69,14 @@ utilityRouter.get("/transaction/:txId", async (req: Request, res: Response) => {
     return res.status(200).json(txData);
 
   } catch (e) {
+    if (e.status) {
+      return res.status(e.status).json({
+        status: getReasonPhrase(e.status),
+        message: e.name,
+        timestamp: new Date().toISOString()
+      })
+    }
+    
     return res.status(500).json({
       status: getReasonPhrase(500),
       message: e,

@@ -32,7 +32,6 @@ export class JobNotFoundError extends Error {
   constructor(message: string, jobId: string) {
     super(message);
     Object.setPrototypeOf(this, JobNotFoundError.prototype);
-
     this.name = "JobNotFoundError";
     this.jobId = jobId;
   }
@@ -76,7 +75,7 @@ export const initJobQueueWorker = (app: Application): Worker => {
   });
 
   worker.on("error", (err) => {
-    logger.error({ err }, "Worker error");
+    // logger.error({ err }, "Worker error");
   });
 
   if (logger.isLevelEnabled("debug")) {

@@ -76,7 +76,8 @@ authRouter.post(
   }
 );
 
-authRouter.post("/enroll",
+authRouter.post(
+  "/enroll",
   body().isObject().withMessage("Body must contain an asset object"),
   body("voterID", "must be a string").notEmpty(),
   body("voterRegisterID", "must be a string").notEmpty(),
@@ -94,9 +95,7 @@ authRouter.post("/enroll",
     }
 
     try {
-
       const { voterID, voterName, voterRegisterID } = req.body;
-
       const data = {
         voterID,
         voterRegisterID,
@@ -106,6 +105,7 @@ authRouter.post("/enroll",
       const datahash = createHash("sha256")
         .update(JSON.stringify(data))
         .digest("hex");
+
       const enroll: any = await enrollUser(datahash);
       const pubCert = Buffer.from(enroll.certificate).toString("base64");
       const prvKey = Buffer.from(enroll.key.toBytes()).toString("base64");
@@ -120,12 +120,13 @@ authRouter.post("/enroll",
         timestamp: new Date().toISOString,
       });
     }
-  });
+  }
+);
 
 authRouter.get("/ping", async (req: Request, res: Response) => {
   const ApiKey = req.headers["x-api-key"];
-  const contract: Contract = req.app.locals[`${ApiKey}_Contract`]?.assetContract;
-
+  const contract: Contract =
+    req.app.locals[`${ApiKey}_Contract`]?.assetContract;
   if (!contract) {
     return res.status(400).json({
       status: getReasonPhrase(400),
@@ -134,10 +135,12 @@ authRouter.get("/ping", async (req: Request, res: Response) => {
   }
   try {
     // await pingChaincode(contract);
+    const message = await contract.evaluateTransaction("Init");
     return res.status(200).json({
       status: getReasonPhrase(200),
-      api_keys: ApiKey
-    })
+      api_keys: ApiKey,
+      message:Buffer.from(message).toString(),
+    });
   } catch (e) {
     return res.status(e.status).json({
       status: getReasonPhrase(e.status),
